@@ -21,14 +21,24 @@ public class UserController {
     @Autowired
     private UserCardService userCardService;
 
+    @GetMapping("/user")
+    public ResponseEntity<User> getUserInfo(@RequestParam Long userId) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
     @PostMapping("/login")
-    public ResponseEntity<LoginDTO> login(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<User> login(@RequestBody LoginDTO loginDTO) {
         Optional<User> userOptional = userService.getUserByEmail(loginDTO.getEmail());
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (user.getPassword().equals(loginDTO.getPassword())) {
                 // La contraseña coincide, permite el inicio de sesión exitoso
-                return ResponseEntity.ok(loginDTO);
+                return ResponseEntity.ok(user);
             } else {
                 // La contraseña no coincide, devuelve una respuesta de error
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
